@@ -1016,7 +1016,32 @@ fun NoticeDetailScreen(
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(24.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                AssistChip(
+                                    onClick = {},
+                                    enabled = false,
+                                    label = {
+                                        Text(
+                                            if (detail.isPublished) "Published Notice" else "Draft Notice",
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.Info,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    },
+                                    colors = AssistChipDefaults.assistChipColors(
+                                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                                        disabledLabelColor = MaterialTheme.colorScheme.primary,
+                                        disabledLeadingIconContentColor = MaterialTheme.colorScheme.primary
+                                    )
+                                )
+
+                                Spacer(modifier = Modifier.height(20.dp))
 
                                 HorizontalDivider(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
@@ -1024,7 +1049,7 @@ fun NoticeDetailScreen(
                                     )
                                 )
 
-                                Spacer(modifier = Modifier.height(24.dp))
+                                Spacer(modifier = Modifier.height(20.dp))
 
                                 val richTextState = rememberRichTextState()
                                 LaunchedEffect(detail.body) {

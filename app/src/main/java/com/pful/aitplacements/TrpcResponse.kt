@@ -2,6 +2,8 @@ package com.pful.aitplacements
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,6 +54,11 @@ data class Attachment(
     val type: String
 )
 
+internal fun createNoticeListInput(page: Int): String = "{\"0\":{\"pageNos\":$page}}"
+internal fun createNoticeDetailInput(id: String): String = "{\"0\":{\"id\":\"$id\"}}"
+internal fun createNoticePageInput(page: Int, id: String): String =
+    "{\"0\":{\"pageNos\":$page},\"1\":{\"id\":\"$id\"}}"
+
 // --- Preferences (Cookie Storage) ---
 class UserPreferences(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -84,6 +91,12 @@ interface AitApiService {
     suspend fun getNoticeDetail(
         @Query("input") inputJson: String
     ): List<TrpcResponse<NoticeDetail>>
+
+    // URL: notice.publishedNoticeList,notice.noticeDetail?batch=1&input={"0":{"pageNos":X},"1":{"id":"UUID"}}
+    @GET("notice.publishedNoticeList,notice.noticeDetail?batch=1")
+    suspend fun getNoticePageData(
+        @Query("input") inputJson: String
+    ): List<TrpcResponse<JsonObject>>
 }
 
 // --- Repository (With Session Cache) ---
@@ -93,6 +106,7 @@ class NoticeRepository(
 ) {
     // Session Cache: Stores pages we've already fetched so we don't reload when switching pages
     private val _pageCache = mutableMapOf<Int, NoticeListResponse>()
+    private val gson = Gson()
     
     fun hasCookie(): Boolean = !prefs.getCookie().isNullOrBlank()
 
@@ -103,13 +117,13 @@ class NoticeRepository(
                 return Result.success(_pageCache[page]!!)
             }
 
-            // Construct tRPC input: {"0":{"pageNos":2}}
-            val input = "{\"0\":{\"pageNos\":$page}}"
+            val input = createNoticeListInput(page)
             
             val response = api.getNotices(input)
             
             // tRPC returns an array, we usually want the first item [0]
-            val data = response.first().result.data
+            val data = response.firstOrNull()?.result?.data
+                ?: return Result.failure(IllegalStateException("Empty notice list response"))
             
             // Save to cache
             _pageCache[page] = data
@@ -122,10 +136,18 @@ class NoticeRepository(
 
     suspend fun getNoticeDetail(id: String): Result<NoticeDetail> {
         return try {
-            // Construct tRPC input: {"0":{"id":"UUID"}}
-            val input = "{\"0\":{\"id\":\"$id\"}}"
-            val response = api.getNoticeDetail(input)
-            Result.success(response.first().result.data)
+            val pageResponse = api.getNoticePageData(createNoticePageInput(1, id))
+            val detailFromPage = pageResponse.getOrNull(1)?.result?.data?.let {
+                gson.fromJson(it, NoticeDetail::class.java)
+            }
+            if (detailFromPage != null) {
+                return Result.success(detailFromPage)
+            }
+
+            val response = api.getNoticeDetail(createNoticeDetailInput(id))
+            val detail = response.firstOrNull()?.result?.data
+                ?: return Result.failure(IllegalStateException("Empty notice detail response"))
+            Result.success(detail)
         } catch (e: Exception) {
             Result.failure(e)
         }

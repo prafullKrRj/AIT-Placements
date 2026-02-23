@@ -1016,7 +1016,32 @@ fun NoticeDetailScreen(
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(24.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Surface(
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                                    shape = RoundedCornerShape(20.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Info,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            if (detail.isPublished) "Published Notice" else "Draft Notice",
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(20.dp))
 
                                 HorizontalDivider(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
@@ -1024,7 +1049,7 @@ fun NoticeDetailScreen(
                                     )
                                 )
 
-                                Spacer(modifier = Modifier.height(24.dp))
+                                Spacer(modifier = Modifier.height(20.dp))
 
                                 val richTextState = rememberRichTextState()
                                 LaunchedEffect(detail.body) {

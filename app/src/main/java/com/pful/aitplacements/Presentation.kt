@@ -519,17 +519,18 @@ fun HomeScreen(
     }
 }
 
+private val NoticeCardLightOrange = Color(0xFFFFF1E6)
+private val NoticeCardSoftOrange = Color(0xFFFFD9B3)
+private val NoticeCardOrangeAccent = Color(0xFFFFA94D)
+
 @Composable
 fun NoticeCard(notice: NoticeItem, onClick: () -> Unit) {
-    val lightOrange = Color(0xFFFFF1E6)
-    val softOrange = Color(0xFFFFD9B3)
-    val orangeAccent = Color(0xFFFFA94D)
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = lightOrange),
+        colors = CardDefaults.cardColors(containerColor = NoticeCardLightOrange),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp,
             pressedElevation = 8.dp
@@ -541,8 +542,8 @@ fun NoticeCard(notice: NoticeItem, onClick: () -> Unit) {
                 .background(
                     Brush.horizontalGradient(
                         listOf(
-                            softOrange,
-                            lightOrange
+                            NoticeCardSoftOrange,
+                            NoticeCardLightOrange
                         )
                     )
                 )
@@ -556,13 +557,13 @@ fun NoticeCard(notice: NoticeItem, onClick: () -> Unit) {
                         modifier = Modifier
                             .size(48.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(orangeAccent.copy(alpha = 0.2f)),
+                            .background(NoticeCardOrangeAccent.copy(alpha = 0.2f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Description,
                             contentDescription = null,
-                            tint = orangeAccent,
+                            tint = NoticeCardOrangeAccent,
                             modifier = Modifier.size(24.dp)
                         )
                     }

@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -520,12 +521,15 @@ fun HomeScreen(
 
 @Composable
 fun NoticeCard(notice: NoticeItem, onClick: () -> Unit) {
+    val lightOrange = Color(0xFFFFF1E6)
+    val softOrange = Color(0xFFFFD9B3)
+    val orangeAccent = Color(0xFFFFA94D)
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = lightOrange),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp,
             pressedElevation = 8.dp
@@ -537,8 +541,8 @@ fun NoticeCard(notice: NoticeItem, onClick: () -> Unit) {
                 .background(
                     Brush.horizontalGradient(
                         listOf(
-                            MaterialTheme.colorScheme.surfaceVariant,
-                            MaterialTheme.colorScheme.surface
+                            softOrange,
+                            lightOrange
                         )
                     )
                 )
@@ -552,13 +556,13 @@ fun NoticeCard(notice: NoticeItem, onClick: () -> Unit) {
                         modifier = Modifier
                             .size(48.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                            .background(orangeAccent.copy(alpha = 0.2f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Description,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = orangeAccent,
                             modifier = Modifier.size(24.dp)
                         )
                     }

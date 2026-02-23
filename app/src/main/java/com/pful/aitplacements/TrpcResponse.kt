@@ -54,10 +54,23 @@ data class Attachment(
     val type: String
 )
 
-internal fun createNoticeListInput(page: Int): String = "{\"0\":{\"pageNos\":$page}}"
-internal fun createNoticeDetailInput(id: String): String = "{\"0\":{\"id\":\"$id\"}}"
+private val trpcGson = Gson()
+private const val DEFAULT_NOTICE_PAGE = 1
+private const val BATCH_DETAIL_INDEX = 1
+
+internal fun createNoticeListInput(page: Int): String =
+    trpcGson.toJson(mapOf("0" to mapOf("pageNos" to page)))
+
+internal fun createNoticeDetailInput(id: String): String =
+    trpcGson.toJson(mapOf("0" to mapOf("id" to id)))
+
 internal fun createNoticePageInput(page: Int, id: String): String =
-    "{\"0\":{\"pageNos\":$page},\"1\":{\"id\":\"$id\"}}"
+    trpcGson.toJson(
+        linkedMapOf(
+            "0" to mapOf("pageNos" to page),
+            "1" to mapOf("id" to id)
+        )
+    )
 
 // --- Preferences (Cookie Storage) ---
 class UserPreferences(context: Context) {
@@ -106,7 +119,6 @@ class NoticeRepository(
 ) {
     // Session Cache: Stores pages we've already fetched so we don't reload when switching pages
     private val _pageCache = mutableMapOf<Int, NoticeListResponse>()
-    private val gson = Gson()
     
     fun hasCookie(): Boolean = !prefs.getCookie().isNullOrBlank()
 
@@ -136,9 +148,9 @@ class NoticeRepository(
 
     suspend fun getNoticeDetail(id: String): Result<NoticeDetail> {
         return try {
-            val pageResponse = api.getNoticePageData(createNoticePageInput(1, id))
-            val detailFromPage = pageResponse.getOrNull(1)?.result?.data?.let {
-                gson.fromJson(it, NoticeDetail::class.java)
+            val pageResponse = api.getNoticePageData(createNoticePageInput(DEFAULT_NOTICE_PAGE, id))
+            val detailFromPage = pageResponse.getOrNull(BATCH_DETAIL_INDEX)?.result?.data?.let {
+                trpcGson.fromJson(it, NoticeDetail::class.java)
             }
             if (detailFromPage != null) {
                 return Result.success(detailFromPage)
